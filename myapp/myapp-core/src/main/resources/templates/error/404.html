@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>404</title>
+    </head>
+
+    <body>
+    <div th:text="${status}">404</div>
+    <div th:text="|[${path}]|">/</div>
+    <div th:text="${error}">not find</div>
+    </body>
+</html>

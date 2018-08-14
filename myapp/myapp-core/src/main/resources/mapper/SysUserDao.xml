@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.myapp.dao.SysUserDao">
+	<!-- columnPrefix="co_" 前缀 -->
+	<resultMap id="SysUserResultMap" type="SysUser">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="username" jdbcType="VARCHAR" property="userName" />
+		<result column="password" jdbcType="VARCHAR" property="passWord" />
+		<result column="namezh" jdbcType="VARCHAR" property="nameZh" />
+		<result column="status" jdbcType="VARCHAR" property="status" />
+		<result column="createat" jdbcType="TIMESTAMP" property="createAt" />
+		<result column="updateat" jdbcType="TIMESTAMP" property="updateAt" />
+	</resultMap>
+	<resultMap id="UserRoleResultMap" type="SysUser" extends="SysUserResultMap">
+		<collection property="sysRoles" ofType="SysRole"
+			resultMap="com.whl.myapp.dao.SysRoleDao.SysRoleResultMap">
+		</collection>
+	</resultMap>
+	<resultMap id="UserRoleResourceResultMap" type="SysUser" extends="SysUserResultMap">
+		<collection property="sysRoles" ofType="SysRole" javaType="java.util.Set" columnPrefix="role_"
+			resultMap="com.whl.myapp.dao.SysRoleDao.SysRoleResourceResultMap">
+		</collection>
+	</resultMap>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		insert
+		into t_sysuser
+		(username, password, namezh,status,createat, updateat)
+		values
+		(#{userName}, #{passWord},#{nameZh},#{status},NOW(), NOW())
+	</insert>
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_sysuser
+		where id
+		= #{id}
+	</delete>
+	<update id="update">
+		update t_sysuser
+		set username = #{userName},
+		password =
+		#{passWord},
+		namezh = #{nameZh},
+		status =#{status},
+		createat =
+		#{createAt},
+		updateat = NOW(),
+		where id = #{id}
+	</update>
+	<select id="get" resultMap="SysUserResultMap">
+		select id, username, password,
+		namezh, status, createat, updateat
+		from t_sysuser
+		where id = #{id}
+	</select>
+	<select id="findUserRole" resultMap="UserRoleResultMap">
+		<!--  select u.id , u.username, u.password,u.namezh, u.status, u.createat, u.updateat,
+		r.id as role_id,r.rolename as role_rolename,r.remark as role_remark-->
+		select u.*,r.*
+		from t_sysuser u 
+		left join t_sysrole_sysuser ru on u.id = ru.sysuser_id 
+		left join t_sysrole r on ru.sysrole_id = r.id
+		where u.id = #{id}
+	</select>
+	<delete id="deleteBatch">
+		delete from t_sysuser where id in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="queryList" resultMap="UserRoleResultMap">
+		select distinct u.*
+		from t_sysuser u left join t_sysrole_sysuser ru on u.id = ru.sysuser_id 
+		left join t_sysrole r on ru.sysrole_id = r.id
+		<include refid="dataGridWhere" />
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by u.${sort} ${order}
+			</when>
+			<otherwise>
+				order by u.id desc
+			</otherwise>
+		</choose>
+	</select>
+	<sql id="dataGridWhere">
+		<where>
+			<if test="userName != null and userName.length()>0">u.name=#{userName}
+			</if>
+			<if test="nameZh != null and nameZh.length()>0">and u.namezh = #{nameZh}</if>
+		</where>
+	</sql>
+	<select id="findByUserName" resultMap="UserRoleResourceResultMap">
+		select distinct u.*,r.rolename as role_rolename,r.id as role_id,resource.perm as role_resource_perm,resource.id as role_resource_id from t_sysuser u
+		left join t_sysrole_sysuser ru on u.id = ru.sysuser_id 
+		left join t_sysrole r on ru.sysrole_id = r.id
+		left join t_sysresource_sysrole rr on rr.sysrole_id = r.id
+		left join t_sysresource resource on resource.id = rr.sysresource_id
+		where u.username = #{userName}
+	</select>
+</mapper>

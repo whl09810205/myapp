@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common_header(title,links,scripts)">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title th:replace="${title}">The awesome application</title>
+
+<!-- Common styles and scripts -->
+<link rel="stylesheet" type="text/css" th:href="@{/js/easyui/themes/icon.css}"/>
+<link rel="stylesheet" type="text/css" th:href="@{/js/bootstrap/css/bootstrap.min.css}"/>
+<!-- 扩展EasyUI Icon -->
+<link rel="stylesheet" th:href="@{/css/extEasyUIIcon.css}" type="text/css">
+<!--/* WdatePicker */-->
+<script type="text/javascript" th:src="@{/js/My97DatePicker/WdatePicker.js}"></script>
+<!--/* jquery */-->
+<script type="text/javascript" th:src="@{/js/easyui/jquery.min.js}"></script>
+<!--/* jquery easyui */-->
+<script type="text/javascript" th:src="@{/js/easyui/locale/easyui-lang-zh_CN.js}"></script>
+<script type="text/javascript" th:src="@{/js/easyui/jquery.easyui.min.js}"></script>
+<link rel="stylesheet" type="text/css" th:href="@{/js/easyui/themes/bootstrap/easyui.css}"/>
+<!--/* jquery easyui plugin*/-->
+<script type="text/javascript" th:src="@{/js/easyui/plugins/jquery.layout.js}"></script>
+<!--/* 扩展*/-->
+<script type="text/javascript" th:src="@{/js/extBrowser.js}"></script>
+<script type="text/javascript" th:src="@{/js/extEasyUI.js}"></script>
+<script type="text/javascript" th:src="@{/js/extJquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/extValidater.js}"></script>
+<!--/* Per-page placeholder for additional links */-->
+<th:block th:replace="${links}" />
+
+<!--/* Per-page placeholder for additional scripts */-->
+<th:block th:replace="${scripts}" />
+
+</head>
+<body>
+<div th:fragment="footer" class="panel-header panel-title" style="text-align: center;">
+	版权所有@<a href="mailto:xx@qq.com">XXX</a>
+</div>
+
+</body>
+</html>

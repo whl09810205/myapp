@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.myapp.dao.SysResourceDao">
+	<resultMap id="SysResourceResultMap" type="SysResource">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="url" jdbcType="VARCHAR" property="url" />
+		<result column="perm" jdbcType="VARCHAR" property="perm" />
+		<result column="pid" jdbcType="INTEGER" property="pid" />
+		<result column="sysresourcetype_id" jdbcType="INTEGER" property="sysResourceTypeId" />
+		<result column="iconcls" jdbcType="VARCHAR" property="iconCls" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="seq" jdbcType="INTEGER" property="seq" />
+	</resultMap>
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		insert into t_sysresource
+		(name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq)
+		values (#{name}, #{url},#{perm}, #{pid}, #{sysResourceTypeId}, #{iconCls},
+		#{remark}, #{seq})
+	</insert>
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_sysresource where id = #{id}
+	</delete>
+
+	<update id="update">
+		update t_sysresource
+		set name = #{name},
+		url = #{url},
+		perm = #{perm},
+		pid = #{pid},
+		sysresourcetype_id = #{sysResourceTypeId},
+		iconcls = #{iconCls},
+		remark = #{remark},
+		seq = #{seq}
+		where id = #{id}
+	</update>
+	<select id="get" resultMap="SysResourceResultMap">
+		select id, name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq
+		from t_sysresource
+		where id = #{id}
+	</select>
+	<select id="findUserResource"
+		resultMap="SysResourceResultMap">
+		select distinct id, name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq
+		from t_sysresource resource 
+		left join t_sysresource_sysrole resourcerole on resource.id = resourcerole.sysresource_id
+		left join t_sysrole_sysuser roleuser on roleuser.sysrole_id = resourcerole.sysrole_id 
+		where roleuser.sysuser_id = #{userId}
+		<if test="sysresourcetype != null">and resource.sysresourcetype_id = #{sysresourcetype}</if>
+		order by seq
+	</select>
+	<insert id="addResourceForRole">
+		insert into t_sysresource_sysrole
+		(sysrole_id, sysresource_id)
+		values (#{sysRoleId}, #{sysResourceId})
+	</insert>
+	<delete id="deleteResourceRole">
+		delete from t_sysresource_sysrole where sysresource_id = #{sysResourceId}
+	</delete>
+	<select id="findByUrl" resultMap="SysResourceResultMap">
+		select id, name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq
+		from t_sysresource
+		where url = #{url}
+	</select>
+</mapper>

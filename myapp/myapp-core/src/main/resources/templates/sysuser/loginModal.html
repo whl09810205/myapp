@@ -1,0 +1,60 @@
+<script th:inline="javascript" type="text/javascript" charset="utf-8">
+	var loginDialog;
+	$(function() {
+	parent.$.messager.progress('close');
+		$('input').keyup(function(event) {
+			if (event.keyCode == '13') {
+				loginFun();
+			}
+		});
+		
+	});
+	function loginFun() {
+	
+		if (parent.layout_west_tree) { //当west功能菜单树加载成功后再执行登录
+		if ($("#form").form('validate')) {
+				parent.$.messager.progress({
+					title : '提示',
+					text : '数据处理中，请稍后....'
+				});
+				$.post(/*[[@{/login}]]*/'/', $("#form").serialize(), function(data) {
+					if (data.success) {
+						if (!parent.layout_west_tree_url) {
+							layout_west_tree.tree({
+								url : /*[[@{/sysResource/menuTree}]]*/'/',
+								onBeforeLoad : function(node, param) {
+									parent.$.messager.progress({
+										title : '提示',
+										text : '数据处理中，请稍后....'
+									});
+								}
+							});
+						}
+						parent.$('#sessionInfoDiv').html($.formatString('[<strong>{0}</strong>]，欢迎你！', data.result));
+					} else {
+						$.messager.alert('错误', data.msg, 'error');
+					}
+					parent.$.messager.progress('close');
+				},"JSON");
+			}
+		}
+	}
+</script>
+
+	<div title="用户输入模式" style="overflow: hidden; padding: 10px;">
+		<form id="form" method="post">
+			<table class="table table-hover table-condensed">
+				<tr>
+					<th>登录名</th>
+					<td><input name="username" type="text" placeholder="请输入登录名"
+						class="easyui-validatebox" data-options="required:true" value=""></td>
+				</tr>
+				<tr>
+					<th>密码</th>
+					<td><input name="password" type="password" placeholder="请输入密码"
+						class="easyui-validatebox" data-options="required:true"
+						value=""></td>
+				</tr>
+			</table>
+		</form>
+	</div>

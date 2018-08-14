@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/myappdb?useUnicode=true&characterEncoding=utf8
+      username: root
+      password: root
+      initial-size: 5
+      max-active: 30
+      min-idle: 5
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      filters: stat,wall,slf4j
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  thymeleaf:
+    cache: false
+  devtools:
+    restart:
+      enabled: true
+server:
+  tomcat:
+    uri-encoding: UTF-8
+mybatis:
+  type-aliases-package: com.whl.myapp.model
+  mapper-locations:
+    - classpath:mapper/SysUserDao.xml
+    - classpath:mapper/SysRoleDao.xml
+    - classpath:mapper/SysResourceDao.xml
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  params: pageNum=page;pageSize=rows;

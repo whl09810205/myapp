@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.myapp.dao.SysRoleDao">
+	<resultMap id="SysRoleResultMap" type="SysRole">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="rolename" jdbcType="VARCHAR" property="roleName" />
+		<result column="pid" jdbcType="INTEGER" property="pid" />
+		<result column="seq" jdbcType="INTEGER" property="seq" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="createat" jdbcType="TIMESTAMP" property="createAt" />
+		<result column="updateat" jdbcType="TIMESTAMP" property="updateAt" />
+	</resultMap>
+	
+	<resultMap id="SysRoleResourceResultMap" type="SysRole" extends="SysRoleResultMap">
+		<collection property="sysResources" ofType="SysResource" javaType="java.util.Set" columnPrefix="resource_"
+			resultMap="com.whl.myapp.dao.SysResourceDao.SysResourceResultMap">
+		</collection>
+	</resultMap>
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_sysrole
+		where id = #{id}
+	</delete>
+	<insert id="save" useGeneratedKeys="true" keyProperty="id">
+		insert into t_sysrole (rolename, pid, seq,remark, create_at, update_at)
+		values (#{rolename}, #{pid}, #{seq}, #{remark}, NOW(), NOW())
+	</insert>
+	<update id="update">
+		update t_sysrole
+		set rolename = #{rolename,jdbcType=VARCHAR},
+		pid = #{pid},
+		seq = #{seq},
+		remark = #{remark},
+		update_at = NOW()
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<select id="get" resultMap="SysRoleResultMap">
+		select id, rolename, pid, seq, remark, create_at, update_at
+		from t_sysrole
+		where id = #{id}
+	</select>
+	<select id="queryList" resultMap="SysRoleResultMap">
+		select rolename, pid, seq,remark, create_at, update_at
+		from t_sysrole
+		<include refid="dataGridWhere" />
+		<choose>
+			<when test="sort != null and sort.trim() != ''">
+				order by ${sort} ${order}
+			</when>
+			<otherwise>
+				order by id desc
+			</otherwise>
+		</choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryTotal" resultMap="SysRoleResultMap">
+		select count(id) from t_sysuser
+		<include refid="dataGridWhere" />
+	</select>
+	<select id="findByRoleName" resultMap="SysRoleResultMap">
+		select id, rolename, pid, seq, remark, createat, updateat
+		from t_sysrole
+		where rolename = #{rolename}
+	</select>
+	<sql id="dataGridWhere">
+		<where>
+			<if test="userName != null and userName.length()>0">name=#{userName}</if>
+			<if test="nameZh != null and nameZh.length()>0">and nameZh = #{nameZh}</if>
+		</where>
+	</sql>
+</mapper>
