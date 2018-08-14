@@ -24,7 +24,6 @@ hs_err_pid*
 .apt_generated
 .classpath
 .factorypath
-.project
 .settings
 .springBeans
 .DS_Store
