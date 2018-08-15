@@ -23,10 +23,7 @@ server:
     uri-encoding: UTF-8
 mybatis:
   type-aliases-package: com.whl.myapp.model
-  mapper-locations:
-    - classpath:mapper/SysUserDao.xml
-    - classpath:mapper/SysRoleDao.xml
-    - classpath:mapper/SysResourceDao.xml
+  mapper-locations: classpath:mapper/*Dao.xml
 pagehelper:
   helper-dialect: mysql
   reasonable: true

@@ -10,63 +10,86 @@
 		<result column="createat" jdbcType="TIMESTAMP" property="createAt" />
 		<result column="updateat" jdbcType="TIMESTAMP" property="updateAt" />
 	</resultMap>
-	
-	<resultMap id="SysRoleResourceResultMap" type="SysRole" extends="SysRoleResultMap">
-		<collection property="sysResources" ofType="SysResource" javaType="java.util.Set" columnPrefix="resource_"
+
+	<resultMap id="SysRoleResourceResultMap" type="SysRole"
+		extends="SysRoleResultMap">
+		<collection property="sysResources" ofType="SysResource"
+			javaType="java.util.Set" columnPrefix="resource_"
 			resultMap="com.whl.myapp.dao.SysResourceDao.SysResourceResultMap">
 		</collection>
 	</resultMap>
 	<delete id="delete" parameterType="java.lang.Integer">
 		delete from t_sysrole
-		where id = #{id}
+		where id
+		= #{id}
 	</delete>
 	<insert id="save" useGeneratedKeys="true" keyProperty="id">
-		insert into t_sysrole (rolename, pid, seq,remark, create_at, update_at)
-		values (#{rolename}, #{pid}, #{seq}, #{remark}, NOW(), NOW())
+		insert
+		into t_sysrole (rolename, pid, seq,remark, createat, updateat)
+		values
+		(#{roleName}, #{pid}, #{seq}, #{remark}, NOW(), NOW())
 	</insert>
+	
 	<update id="update">
 		update t_sysrole
-		set rolename = #{rolename,jdbcType=VARCHAR},
-		pid = #{pid},
+		set rolename = #{roleName},
+		pid =
+		#{pid},
 		seq = #{seq},
 		remark = #{remark},
-		update_at = NOW()
-		where id = #{id,jdbcType=INTEGER}
+		updateat = NOW()
+		where id =
+		#{id}
 	</update>
+
 	<select id="get" resultMap="SysRoleResultMap">
-		select id, rolename, pid, seq, remark, create_at, update_at
+		select id, rolename, pid, seq,
+		remark, createat, updateat
 		from t_sysrole
 		where id = #{id}
 	</select>
-	<select id="queryList" resultMap="SysRoleResultMap">
-		select rolename, pid, seq,remark, create_at, update_at
-		from t_sysrole
-		<include refid="dataGridWhere" />
-		<choose>
-			<when test="sort != null and sort.trim() != ''">
-				order by ${sort} ${order}
-			</when>
-			<otherwise>
-				order by id desc
-			</otherwise>
-		</choose>
-		<if test="offset != null and limit != null">
-			limit #{offset}, #{limit}
-		</if>
+
+	<select id="getRoleResourceByRoleId" resultMap="SysRoleResourceResultMap">
+		select distinct
+		r.*,
+		resource.id as resource_id
+		from t_sysrole r
+		left join t_sysresource_sysrole rr on rr.sysrole_id = r.id
+		left join
+		t_sysresource resource on resource.id = rr.sysresource_id
+		where r.id =
+		#{id} order by r.seq
 	</select>
-	<select id="queryTotal" resultMap="SysRoleResultMap">
-		select count(id) from t_sysuser
-		<include refid="dataGridWhere" />
-	</select>
+
 	<select id="findByRoleName" resultMap="SysRoleResultMap">
-		select id, rolename, pid, seq, remark, createat, updateat
+		select id, rolename, pid,
+		seq, remark, createat, updateat
 		from t_sysrole
-		where rolename = #{rolename}
+		where rolename =
+		#{rolename} limit 1
 	</select>
-	<sql id="dataGridWhere">
-		<where>
-			<if test="userName != null and userName.length()>0">name=#{userName}</if>
-			<if test="nameZh != null and nameZh.length()>0">and nameZh = #{nameZh}</if>
-		</where>
-	</sql>
+	<select id="findRoleResourceByUserId" resultMap="SysRoleResourceResultMap">
+		select distinct
+		r.*,
+		resource.id as resource_id,resource.name as
+		resource_name,resource.seq as resource_seq
+		from t_sysrole r left join
+		t_sysrole_sysuser ru on r.id = ru.sysrole_id
+		left join
+		t_sysresource_sysrole rr on rr.sysrole_id = r.id
+		left join
+		t_sysresource resource on resource.id = rr.sysresource_id
+		where
+		ru.sysuser_id = #{userId} order by r.seq, resource_seq
+	</select>
+	<insert id="addResourcesForRole">
+		insert into t_sysresource_sysrole (sysrole_id, sysresource_id)
+		values
+		<foreach item="resourceId" collection="resourceIds"  separator=",">
+			(#{roleId},#{resourceId})
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		sysrole_id = values(sysrole_id),
+		sysresource_id = values(sysresource_id)
+	</insert>
 </mapper>

@@ -1,0 +1,68 @@
+<script th:inline="javascript" type="text/javascript">
+	$(function() {
+		$('#pid').combotree({
+			url : /*[[@{/sysRole/tree}]]*/'',
+			parentField : 'pid',
+			lines : true,
+			panelHeight : 'auto',
+			value : /*[[${sysRole.pid}]]*/'',
+			onLoadSuccess : function() {
+				parent.$.messager.progress('close');
+			}
+		});
+
+		$('#form').form({
+			url : /*[[@{/sysRole/save}]]*/'',
+			onSubmit : function() {
+				parent.$.messager.progress({
+					title : '提示',
+					text : '数据处理中，请稍后....'
+				});
+				var isValid = $(this).form('validate');
+				if (!isValid) {
+					parent.$.messager.progress('close');
+				}
+				return isValid;
+			},
+			success : function(result) {
+				parent.$.messager.progress('close');
+				try{
+					result = $.parseJSON(result);
+					if (result.success) {
+					parent.$.modalDialog.openner_treeGrid.treegrid('reload');//之所以能在这里调用到parent.$.modalDialog.openner_treeGrid这个对象，是因为role.jsp页面预定义好了
+					parent.$.modalDialog.handler.dialog('close');
+				}else{
+					$.messager.alert('错误', result.msg);
+				}
+				}catch(e){
+					$.messager.alert('错误', result);
+				}
+				
+			}
+		});
+	});
+</script>
+<div class="easyui-layout" data-options="fit:true,border:false">
+	<div data-options="region:'center',border:false" title="" style="overflow: hidden;">
+		<form id="form" method="post" th:object="${sysRole}">
+		<input type="hidden" th:field="*{id}">
+			<table class="table table-hover table-condensed">
+				<tr>
+					<th>角色名称</th>
+					<td><input type="text" th:field="*{roleName}" placeholder="请输入角色名称" class="easyui-validatebox span2" data-options="required:true"></td>
+					<th>排序</th>
+					<td><input th:field="*{seq}" class="easyui-numberspinner" style="width: 140px; height: 29px;" required="required" data-options="editable:false"></td>
+					
+				</tr>
+				<tr>
+					<th>上级角色</th>
+					<td colspan="3"><select  th:field="*{pid}" style="width: 140px; height: 29px;"></select><img th:src="@{@{/css/images/extjs_icons/cut_red.png}}" onclick="$('#pid').combotree('clear');" /></td>
+				</tr>
+				<tr>
+					<th>备注</th>
+					<td colspan="3"><textarea th:field="*{remark}" rows="" cols="" class="span5">${role.remark}</textarea></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>

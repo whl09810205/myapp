@@ -17,7 +17,7 @@
 		insert into t_sysresource
 		(name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq)
 		values (#{name}, #{url},#{perm}, #{pid}, #{sysResourceTypeId}, #{iconCls},
-		#{remark}, #{seq})
+		#{remark}, #{seq}) 
 	</insert>
 	<delete id="delete" parameterType="java.lang.Integer">
 		delete from t_sysresource where id = #{id}
@@ -56,11 +56,22 @@
 		values (#{sysRoleId}, #{sysResourceId})
 	</insert>
 	<delete id="deleteResourceRole">
-		delete from t_sysresource_sysrole where sysresource_id = #{sysResourceId}
+		delete from t_sysresource_sysrole 
+		<choose>
+			<when test="sysResourceId != null || sysRoleId != null ">
+				<where>
+					<if test="sysResourceId != null ">sysresource_id=#{sysResourceId}</if>
+					<if test="sysRoleId != null">and sysrole_id = #{sysRoleId}</if>
+				</where>
+			</when>
+			<otherwise>
+				where 1=-1
+			</otherwise>
+		</choose>
 	</delete>
 	<select id="findByUrl" resultMap="SysResourceResultMap">
 		select id, name, url,perm, pid, sysresourcetype_id, iconcls, remark, seq
 		from t_sysresource
-		where url = #{url}
+		where binary url = #{url}
 	</select>
 </mapper>

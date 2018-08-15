@@ -12,7 +12,7 @@
 		<result column="updateat" jdbcType="TIMESTAMP" property="updateAt" />
 	</resultMap>
 	<resultMap id="UserRoleResultMap" type="SysUser" extends="SysUserResultMap">
-		<collection property="sysRoles" ofType="SysRole"
+		<collection property="sysRoles" ofType="SysRole" columnPrefix="role_"
 			resultMap="com.whl.myapp.dao.SysRoleDao.SysRoleResultMap">
 		</collection>
 	</resultMap>
@@ -28,12 +28,13 @@
 		(username, password, namezh,status,createat, updateat)
 		values
 		(#{userName}, #{passWord},#{nameZh},#{status},NOW(), NOW())
+		ON duplicate KEY UPDATE
+		username = values(username),
+		password = values(),
+		namezh = values(password),
+		status =values(status),
+		updateat = NOW(),
 	</insert>
-	<delete id="delete" parameterType="java.lang.Integer">
-		delete from t_sysuser
-		where id
-		= #{id}
-	</delete>
 	<update id="update">
 		update t_sysuser
 		set username = #{userName},
@@ -46,6 +47,12 @@
 		updateat = NOW(),
 		where id = #{id}
 	</update>
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from t_sysuser
+		where id
+		= #{id}
+	</delete>
+	
 	<select id="get" resultMap="SysUserResultMap">
 		select id, username, password,
 		namezh, status, createat, updateat
@@ -55,7 +62,7 @@
 	<select id="findUserRole" resultMap="UserRoleResultMap">
 		<!--  select u.id , u.username, u.password,u.namezh, u.status, u.createat, u.updateat,
 		r.id as role_id,r.rolename as role_rolename,r.remark as role_remark-->
-		select u.*,r.*
+		select u.*,r.id as role_id,r.rolename as role_rolename,r.remark as role_remark
 		from t_sysuser u 
 		left join t_sysrole_sysuser ru on u.id = ru.sysuser_id 
 		left join t_sysrole r on ru.sysrole_id = r.id
@@ -69,7 +76,7 @@
 		</foreach>
 	</delete>
 	<select id="queryList" resultMap="UserRoleResultMap">
-		select distinct u.*
+		select distinct u.*,r.id as role_id,r.rolename as role_rolename,r.remark as role_remark
 		from t_sysuser u left join t_sysrole_sysuser ru on u.id = ru.sysuser_id 
 		left join t_sysrole r on ru.sysrole_id = r.id
 		<include refid="dataGridWhere" />
@@ -84,7 +91,7 @@
 	</select>
 	<sql id="dataGridWhere">
 		<where>
-			<if test="userName != null and userName.length()>0">u.name=#{userName}
+			<if test="userName != null and userName.length()>0">u.username=#{userName}
 			</if>
 			<if test="nameZh != null and nameZh.length()>0">and u.namezh = #{nameZh}</if>
 		</where>
@@ -97,4 +104,18 @@
 		left join t_sysresource resource on resource.id = rr.sysresource_id
 		where u.username = #{userName}
 	</select>
+	<delete id="deleteRoleUser">
+		delete from t_sysrole_sysuser 
+		<choose>
+			<when test="sysUserId != null || sysRoleId != null ">
+				<where>
+					<if test="sysUserId != null ">sysuser_id=#{sysUserId}</if>
+					<if test="sysRoleId != null">and sysrole_id = #{sysRoleId}</if>
+				</where>
+			</when>
+			<otherwise>
+				where 1=-1
+			</otherwise>
+		</choose>
+	</delete>
 </mapper>

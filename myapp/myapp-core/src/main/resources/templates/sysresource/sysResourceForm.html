@@ -7,13 +7,18 @@
 				return $.formatString('<span class="{0}" style="display:inline-block;vertical-align:middle;width:16px;height:16px;"></span>{1}', v.value, v.value);
 			}
 		});
+		$('#sysResourceTypeId').combobox({
+			url : /*[[@{/sysResourceType/comboxList}]]*/'',
+			valueField : 'id',
+			textField : 'name'
+		});
 
 		$('#pid').combotree({
-			url : /*[[@{/sysResource/resourceTree}]]*/,
+			url : /*[[@{/sysResource/resourceTree}]]*/'',
 			parentField : 'pid',
 			lines : true,
 			panelHeight : 'auto',
-			value : /*[[${sysResource}==null? null:${sysResource.pid}]]*/'',
+			value : /*[[${sysResource.pid}]]*/'',
 			onLoadSuccess : function() {
 				parent.$.messager.progress('close');
 			}
@@ -70,8 +75,8 @@
 				<tr>
 					<th>资源类型</th>
 					<td>
-					<input name="sysResourceTypeId" th:value="${sysResource.sysResourceTypeId}" type="text" placeholder="请输入资源类型"
-						class="easyui-validatebox span2">
+					<input id="sysResourceTypeId" name="sysResourceTypeId" th:value="${sysResource.sysResourceTypeId}"
+						style="width: 140px; height: 29px;" data-options="editable:false">
 					</td>
 					<th>上级资源</th>
 					<td><select id="pid" name="pid" style="width: 140px; height: 29px;"></select><img th:src="@{/css/images/extjs_icons/cut_red.png}" onclick="$('#pid').combotree('clear');" /></td>
@@ -80,11 +85,11 @@
 					<th>排序</th>
 					<td><input name="seq" th:value="${sysResource.seq}" class="easyui-numberspinner" style="width: 140px; height: 29px;" required="required" data-options="editable:false,min:1"></td>
 					<th>菜单图标</th>
-					<td><input id="iconCls" name="iconCls" th:field="${sysResource.iconCls}" style="width: 140px; height: 29px;" data-options="editable:false" /></td>
+					<td><input id="iconCls" name="iconCls" th:value="${sysResource.iconCls}" style="width: 140px; height: 29px;" data-options="editable:false" /></td>
 				</tr>
 				<tr>
 					<th>备注</th>
-					<td colspan="3"><textarea name="remark" th:value="${sysResource.remark}"  rows="" cols="" class="span5"></textarea></td>
+					<td colspan="3"><textarea name="remark" th:text="${sysResource.remark}"  rows="" cols="" class="span5"></textarea></td>
 				</tr>
 			</table>
 		</form>

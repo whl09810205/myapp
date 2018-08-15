@@ -15,7 +15,7 @@ public class Tree implements java.io.Serializable {
 	private Object attributes;
 	private List<Tree> children;
 	private String iconCls;
-	private Integer pid;
+	private String pid;
 
 	public String getId() {
 		return id;
@@ -73,11 +73,11 @@ public class Tree implements java.io.Serializable {
 		this.iconCls = iconCls;
 	}
 
-	public Integer getPid() {
+	public String getPid() {
 		return pid;
 	}
 
-	public void setPid(Integer pid) {
+	public void setPid(String pid) {
 		this.pid = pid;
 	}
 

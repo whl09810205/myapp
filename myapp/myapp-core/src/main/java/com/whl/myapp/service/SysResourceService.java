@@ -21,6 +21,6 @@ public interface SysResourceService {
 
 	ResultData<SysResource> delete(Integer id);
 
-	ResultData getAllSysResources();
+	ResultData<SysResource> getAllSysResources();
 
 }

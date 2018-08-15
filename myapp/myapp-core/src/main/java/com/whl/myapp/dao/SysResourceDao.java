@@ -15,7 +15,7 @@ public interface SysResourceDao extends BaseDao<SysResource>{
 
 	void addResourceForRole(@Param("sysRoleId")Integer sysRoleId, @Param("sysResourceId")Integer sysResourceId);
 
-	void deleteResourceRole(@Param("sysResourceId")Integer sysResourceId);
+	void deleteResourceRole(@Param("sysResourceId")Integer sysResourceId,@Param("sysRoleId")Integer sysRoleId);
 
 	SysResource findByUrl(String url);
 }

@@ -3,75 +3,71 @@
 	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="template :: common_header(~{::title},~{},~{::script})">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>资源管理</title>
-<shro:hasPermission="/sysResource/edit">
-	<script type="text/javascript">
+<title>角色管理</title>
+	<script shiro:hasPermission="role:edit" type="text/javascript">
 		$.canEdit = true;
 	</script>
-</shro:hasPermission>
-<shro:hasPermission="/sysResource/delete">
-	<script type="text/javascript">
+	<script shiro:hasPermission="role:delete" type="text/javascript">
 		$.canDelete = true;
 	</script>
-</shro:hasPermission>
-<script th:inline="javascript">
+	<script shiro:hasPermission="role:grantPage" type="text/javascript">
+		$.canGrant = true;
+	</script>
+<script th:inline="javascript" type="text/javascript">
 /*<![CDATA[*/
 	var treeGrid;
 	$(function() {
 		treeGrid = $('#treeGrid').treegrid({
-			url : /*[[@{/sysResource/treeGrid}]]*/'',
+			url : /*[[@{/sysRole/treeGrid}]]*/'',
 			idField : 'id',
-			treeField : 'name',
+			treeField : 'roleName',
 			parentField : 'pid',
 			fit : true,
 			fitColumns : false,
 			border : false,
+			nowrap : true,
 			frozenColumns : [ [ {
 				title : '编号',
 				field : 'id',
-				width : 150,
 				hidden : true
+			}, {
+				field : 'roleName',
+				title : '角色名称',
+				width : 150
 			} ] ],
 			columns : [ [ {
-				field : 'name',
-				title : '资源名称',
-				width : 200
-			}, {
-				field : 'url',
-				title : '资源路径',
-				width : 230
-			}, {
-				field : 'sysResourceTypeId',
-				title : '资源类型ID',
-				width : 150,
-				hidden : true
-			}, {
-				field : 'typename',
-				title : '资源类型',
-				width : 80,
+				field : 'sysResources',
+				title : '拥有资源',
+				width : 350,
 				formatter : function(value, row, index) {
-					if (row.sysResourceTypeId == 0) {
-						return "菜单";
-					} else {
-						return "功能";
+					if(value){
+						return value.map(function(v){return v.name;});
 					}
+					return "";
 				}
-			}, {
-				field : 'seq',
-				title : '排序',
-				width : 40
-			}, {
+			},{
 				field : 'remark',
 				title : '备注',
-				width : 150
+				width : 100
+			},{
+				field : 'seq',
+				title : '排序',
+				width : 50
 			}, {
 				field : 'action',
 				title : '操作',
-				width : 50,
+				width : 80,
 				formatter : function(value, row, index) {
+					if(row.roleName=="SUPERADMIN"){
+						return '';
+					}
 					var str = '';
 					if ($.canEdit) {
 						str += $.formatString('<img onclick="editFun(\'{0}\');" src="{1}" title="编辑"/>', row.id, /*[[@{/css/images/extjs_icons/pencil.png}]]*/'');
+					}
+					str += '&nbsp;';
+					if ($.canGrant) {
+						str += $.formatString('<img onclick="grantFun(\'{0}\');" src="{1}" title="授权"/>', row.id, /*[[@{/css/images/extjs_icons/key.png}]]*/'');
 					}
 					str += '&nbsp;';
 					if ($.canDelete) {
@@ -92,6 +88,7 @@
 			},
 			onLoadSuccess : function() {
 				parent.$.messager.progress('close');
+
 				$(this).treegrid('tooltip');
 			}
 		});
@@ -103,19 +100,18 @@
 		}
 		var node = treeGrid.treegrid('getSelected');
 		if (node) {
-			parent.$.messager.confirm('询问', '您是否要删除当前资源？', function(b) {
+			parent.$.messager.confirm('询问', '您是否要删除当前角色？', function(b) {
 				if (b) {
 					parent.$.messager.progress({
 						title : '提示',
 						text : '数据处理中，请稍后....'
 					});
-					$.post(/*[[@{/sysResource/delete}]]*/'', {
+					$.post(/*[[@{/sysRole/delete}]]*/, {
 						id : node.id
 					}, function(result) {
 						if (result.success) {
 							parent.$.messager.alert('提示', result.msg, 'info');
 							treeGrid.treegrid('reload');
-							parent.layout_west_tree.tree('reload');
 						}
 						parent.$.messager.progress('close');
 					}, 'JSON');
@@ -131,15 +127,15 @@
 		var node = treeGrid.treegrid('getSelected');
 		if (node) {
 			parent.$.modalDialog({
-				title : '编辑资源',
+				title : '编辑角色',
 				width : 500,
 				height : 300,
-				href : /*[[@{/sysResource/editPage}]]*/'',
-				queryParams : {id:node.id},
+				href : /*[[@{/sysRole/editPage}]]*/,
+				queryParams: {id : node.id},
 				buttons : [ {
-					text : '保存',
+					text : '编辑',
 					handler : function() {
-						parent.$.modalDialog.openner_treeGrid = treeGrid; //因为添加成功之后，需要刷新这个treeGrid，所以先预定义好
+						parent.$.modalDialog.openner_treeGrid = treeGrid;//因为添加成功之后，需要刷新这个treeGrid，所以先预定义好
 						var f = parent.$.modalDialog.handler.find('#form');
 						f.submit();
 					}
@@ -149,15 +145,22 @@
 	}
 
 	function addFun() {
+		//默认选中的资源为父资源
+		var queryParams = {pid : ""}
+		var node = treeGrid.treegrid('getSelected');
+		if(node){
+			queryParams = {pid : node.id }
+		}
 		parent.$.modalDialog({
-			title : '添加资源',
+			title : '添加角色',
 			width : 500,
 			height : 300,
-			href : /*[[@{/sysResource/addPage}]]*/'',
+			href : /*[[@{/sysRole/addPage}]]*/,
+			queryParams : queryParams,
 			buttons : [ {
-				text : '保存',
+				text : '添加',
 				handler : function() {
-					parent.$.modalDialog.openner_treeGrid = treeGrid; //因为添加成功之后，需要刷新这个treeGrid，所以先预定义好
+					parent.$.modalDialog.openner_treeGrid = treeGrid;//因为添加成功之后，需要刷新这个treeGrid，所以先预定义好
 					var f = parent.$.modalDialog.handler.find('#form');
 					f.submit();
 				}
@@ -182,42 +185,50 @@
 			treeGrid.treegrid('collapseAll');
 		}
 	}
+
+	function grantFun(id) {
+		if (id != undefined) {
+			treeGrid.treegrid('select', id);
+		}
+		var node = treeGrid.treegrid('getSelected');
+		if (node) {
+			parent.$.modalDialog({
+				title : '角色授权',
+				width : 500,
+				height : 500,
+				href : /*[[@{/sysRole/grantPage}]]*/,
+				queryParams :  {id : id},
+				buttons : [ {
+					text : '授权',
+					handler : function() {
+						parent.$.modalDialog.openner_treeGrid = treeGrid;//因为添加成功之后，需要刷新这个treeGrid，所以先预定义好
+						var f = parent.$.modalDialog.handler.find('#form');
+						f.submit();
+					}
+				} ]
+			});
+		}
+	}
 	/*]]>*/
 </script>
 </head>
 <body>
 	<div class="easyui-layout" data-options="fit:true,border:false">
-		<div data-options="region:'center',border:false" title=""
-			style="overflow: hidden;">
+		<div data-options="region:'center',border:false" title="" style="overflow: hidden;">
 			<table id="treeGrid"></table>
 		</div>
 	</div>
 	<div id="toolbar" style="display: none;">
-		<c:if
-			test="${fn:contains(sessionInfo.resourceList, '/resourceController/addPage')}">
-			<a onclick="addFun();" href="javascript:void(0);"
-				class="easyui-linkbutton"
-				data-options="plain:true,iconCls:'pencil_add'">添加</a>
-		</c:if>
-		<a onclick="redo();" href="javascript:void(0);"
-			class="easyui-linkbutton"
-			data-options="plain:true,iconCls:'resultset_next'">展开</a> <a
-			onclick="undo();" href="javascript:void(0);"
-			class="easyui-linkbutton"
-			data-options="plain:true,iconCls:'resultset_previous'">折叠</a> <a
-			onclick="treeGrid.treegrid('reload');" href="javascript:void(0);"
-			class="easyui-linkbutton"
-			data-options="plain:true,iconCls:'transmit'">刷新</a>
+			<a onclick="addFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'pencil_add'">添加</a>
+		<a onclick="redo();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'resultset_next'">展开</a> 
+		<a onclick="undo();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'resultset_previous'">折叠</a> 
+		<a onclick="treeGrid.treegrid('reload');" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'transmit'">刷新</a>
 	</div>
 
 	<div id="menu" class="easyui-menu" style="width: 120px; display: none;">
-
-		<div onclick="addFun();" data-options="iconCls:'pencil_add'">增加</div>
-
-		<div onclick="deleteFun();" data-options="iconCls:'pencil_delete'">删除</div>
-
-		<div onclick="editFun();" data-options="iconCls:'pencil'">编辑</div>
-
+			<div shiro:hasPermission="role:add" onclick="addFun();" data-options="iconCls:'pencil_add'">增加</div>
+			<div shiro:hasPermission="role:delete" onclick="deleteFun();" data-options="iconCls:'pencil_delete'">删除</div>
+			<div shiro:hasPermission="role:edit" onclick="editFun();" data-options="iconCls:'pencil'">编辑</div>
 	</div>
 </body>
 </html>

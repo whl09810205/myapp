@@ -75,7 +75,7 @@ public class SysResourceServiceImpl extends BaseService<SysResource> implements 
 			Tree tree = new Tree();
 			tree.setId(menu.getId().toString());
 			if (menu.getPid() != null) {
-				tree.setPid(menu.getPid());
+				tree.setPid(menu.getPid().toString());
 			}
 			tree.setText(menu.getName());
 			tree.setIconCls(menu.getIconCls());
@@ -108,17 +108,17 @@ public class SysResourceServiceImpl extends BaseService<SysResource> implements 
 	}
 
 	@Override
-	public ResultData<SysResource> delete(Integer id) {
-		sysResourceDao.deleteResourceRole(id);
-		sysResourceDao.delete(id);
+	public ResultData<SysResource> delete(Integer sysResourceId) {
+		sysResourceDao.deleteResourceRole(sysResourceId, null);
+		sysResourceDao.delete(sysResourceId);
 		return getSuccess(null);
 	}
 
 	@Override
-	public ResultData getAllSysResources() {
+	public ResultData<SysResource> getAllSysResources() {
 		Reflections reflections = new Reflections("com.whl.myapp.controller",new TypeAnnotationsScanner(),new SubTypesScanner());
 		Set<Class<?>> classesSet = reflections.getTypesAnnotatedWith(Controller.class);
-		for(Class cls : classesSet){
+		for(Class<?> cls : classesSet){
 			RequestMapping clsRequestMapping = (RequestMapping) cls.getAnnotation(RequestMapping.class);
 			String clsPath = "";
 			if(null != clsRequestMapping){
@@ -139,14 +139,13 @@ public class SysResourceServiceImpl extends BaseService<SysResource> implements 
 							sysResource.setName(url);
 							sysResource.setPerm(perm);
 							sysResource.setSysResourceTypeId(1);//默认为功能
-							sysResourceDao.save(sysResource);
+							sysResourceDao.save(sysResource);							
 							SysRole sysRole = sysRoleDao.findByRoleName("SUPERADMIN");
 							sysResourceDao.addResourceForRole(sysRole.getId(), sysResource.getId());
 						}else {
 							sysResource.setPerm(perm);
 							sysResourceDao.update(sysResource);
 						}
-						
 					}
 				}
 			}

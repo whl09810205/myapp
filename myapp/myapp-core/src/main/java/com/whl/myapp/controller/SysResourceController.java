@@ -3,9 +3,7 @@ package com.whl.myapp.controller;
 
 import java.util.List;
 
-import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -27,7 +25,7 @@ public class SysResourceController {
 	@RequiresPermissions("resource:manage")
 	@RequestMapping("/manage")
 	public String manage(){
-		return "sysresource/manage";
+		return "sysresource/sysResourceManage";
 	}
 	/**
 	 * 权限treeGrid
@@ -58,16 +56,18 @@ public class SysResourceController {
 	}
 	@RequiresPermissions("resource:add")
 	@RequestMapping("/addPage")
-	public String addPage(ModelMap modelMap){
-		modelMap.put("sysResource", new SysResource());
-		return "sysresource/form";
+	public String addPage(Integer pid,ModelMap modelMap){
+		SysResource sysResource = new SysResource();
+		sysResource.setPid(pid);
+		modelMap.put("sysResource", sysResource);
+		return "sysresource/sysResourceForm";
 	}
 	@RequiresPermissions("resource:edit")
 	@RequestMapping("/editPage")
 	public String editPage(Integer id,ModelMap modelMap){
 		SysResource sysResource = sysResourceService.get(id);
 		modelMap.put("sysResource", sysResource);
-		return "sysresource/form";
+		return "sysresource/sysResourceForm";
 	}
 	@RequiresPermissions("resource:save")
 	@RequestMapping(value="/save",method =RequestMethod.POST )
@@ -75,7 +75,7 @@ public class SysResourceController {
 	public ResultData<SysResource> save(SysResource sysResource){
 		return sysResourceService.save(sysResource);
 	}
-	@RequiresPermissions("resource::delete")
+	@RequiresPermissions("resource:delete")
 	@RequestMapping("/delete")
 	@ResponseBody
 	public ResultData<SysResource> delete(Integer id){
@@ -85,7 +85,7 @@ public class SysResourceController {
 	@RequiresPermissions("resource:getAllSysResources")
 	@RequestMapping("/getAllSysResources")
 	@ResponseBody
-	public ResultData getAllSysResources(){
+	public ResultData<SysResource> getAllSysResources(){
 		return sysResourceService.getAllSysResources();
 	}
 	
