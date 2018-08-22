@@ -5,6 +5,8 @@ import java.util.Map;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.github.pagehelper.PageHelper;
@@ -18,11 +20,13 @@ public class SysUserServiceImpl implements SysUserService {
 
 	@Autowired
 	SysUserDao sysUserDao;
+	@Autowired
+	RedisTemplate redisTemplate;
+
 	@Override
 	public SysUser findByUsername(String username) {
 		return sysUserDao.findByUserName(username);
 	}
-	
 
 	public static void main(String[] args) {
 		SysUser user = new SysUserServiceImpl().findByUsername(null);
@@ -31,9 +35,10 @@ public class SysUserServiceImpl implements SysUserService {
 		System.out.println(newPs);
 	}
 
-
 	@Override
+	 @Cacheable(value="dataGrid")
 	public DataGrid dataGrid(Map<String, Object> params) {
-		return new DataGrid(PageHelper.startPage(params).doSelectPage(()->sysUserDao.queryList(params)));
+		DataGrid dataGrid = new DataGrid(PageHelper.startPage(params).doSelectPage(()->sysUserDao.queryList(params)));
+		return dataGrid;
 	}
 }

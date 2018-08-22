@@ -1,5 +1,9 @@
 package com.whl.myapp;
 
+import java.util.TimeZone;
+
+import javax.annotation.PostConstruct;
+
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +19,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @MapperScan("com.whl.myapp.dao")
 public class Application {
-
+	 @PostConstruct
+	   void setDefaultTimezone() {
+	      TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+//	    TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
+	   }
 	public static void main(String[] args) {
 		
 		SpringApplication.run(Application.class, args);

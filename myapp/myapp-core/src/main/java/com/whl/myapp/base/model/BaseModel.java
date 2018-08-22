@@ -5,9 +5,8 @@ import java.util.Date;
 
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
-public class BaseModel implements Serializable{
+public class BaseModel{
 
-	private static final long serialVersionUID = 7508323298728620200L;
 
 	protected Date createAt;
 	

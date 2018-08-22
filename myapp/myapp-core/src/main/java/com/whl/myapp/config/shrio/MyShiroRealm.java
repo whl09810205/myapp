@@ -1,4 +1,4 @@
-package com.whl.myapp.config;
+package com.whl.myapp.config.shrio;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -10,6 +10,7 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import com.whl.myapp.model.SysResource;
 import com.whl.myapp.model.SysRole;
@@ -19,6 +20,7 @@ import com.whl.myapp.service.SysUserService;
 public class MyShiroRealm extends AuthorizingRealm{
 
 	@Autowired
+	@Lazy//解决@cacheable注解失效问题
 	SysUserService sysUserService;
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {

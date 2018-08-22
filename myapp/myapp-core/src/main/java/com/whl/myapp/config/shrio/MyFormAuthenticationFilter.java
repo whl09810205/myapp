@@ -1,4 +1,4 @@
-package com.whl.myapp.config;
+package com.whl.myapp.config.shrio;
 
 import java.io.IOException;
 

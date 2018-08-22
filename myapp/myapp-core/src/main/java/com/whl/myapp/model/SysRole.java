@@ -1,5 +1,6 @@
 package com.whl.myapp.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ import com.whl.myapp.base.model.BaseModel;
  * @author hailong
  *
  */
-public class SysRole  extends BaseModel{
+public class SysRole  extends BaseModel implements Serializable{
     /**
 	 * 
 	 */

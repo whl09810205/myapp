@@ -1,11 +1,12 @@
 package com.whl.myapp.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 import com.whl.myapp.base.model.BaseModel;
 
-public class SysResource extends BaseModel{
+public class SysResource extends BaseModel implements Serializable{
 
     /**
 	 * 
@@ -15,6 +16,7 @@ public class SysResource extends BaseModel{
 	private Integer id;
 
     private String name;
+    
 
     private String url;
 
